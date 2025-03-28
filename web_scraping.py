@@ -56,8 +56,17 @@ def get_github_user_info(github_username):
 st.title("GitHub User Information Scraper")
 st.write("### Enter GitHub Username to Fetch User Information")
 
-# User input for GitHub username
-username = st.text_input("Enter GitHub Username:")
+# Session state initialization for username and error message
+if 'username' not in st.session_state:
+    st.session_state.username = ""
+if 'error' not in st.session_state:
+    st.session_state.error = ""
+if 'user_info' not in st.session_state:
+    st.session_state.user_info = None
+
+# Create input field for GitHub username (with unique key)
+username_input_key = "username_input"  # Unique key for the input field
+username = st.text_input("Enter GitHub Username:", value=st.session_state.username, key=username_input_key)
 
 # Button to fetch data
 if st.button("Fetch Info"):
@@ -65,6 +74,11 @@ if st.button("Fetch Info"):
         user_info = get_github_user_info(username)
 
         if user_info:
+            # Store the username and user data in session state
+            st.session_state.username = username
+            st.session_state.user_info = user_info
+            st.session_state.error = ""
+
             # Display the information in a structured way
             st.image(user_info['profile_image_url'], caption=f"Profile Image of {username}", use_container_width=True)
             st.subheader(f"Name: {user_info['name']}")
@@ -85,12 +99,16 @@ if st.button("Fetch Info"):
             else:
                 st.write("No public repositories found.")
         else:
-            st.error(f"User with the username `{username}` not found or there is an issue fetching the data.")
+            st.session_state.error = f"User with the username `{username}` not found or there is an issue fetching the data."
+            st.error(st.session_state.error)
     else:
         st.warning("Please enter a valid GitHub username.")
 
-# Button to clear input
-if st.button("Clear"):
-    # Instead of rerunning, we will clear the text input
-    st.session_state.username = ""
-    st.experimental_rerun()  # Use this to refresh the app and clear previous data
+# Display the error message if any
+if st.session_state.error:
+    st.error(st.session_state.error)
+
+# Reset the form once the user fetches data (for checking another username)
+if st.session_state.user_info:
+    st.session_state.username = ""  # Clear the input for a new username
+    st.session_state.user_info = None  # Reset user information
