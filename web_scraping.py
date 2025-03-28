@@ -91,5 +91,6 @@ if st.button("Fetch Info"):
 
 # Button to clear input
 if st.button("Clear"):
-    st.text_input("Enter GitHub Username:", value="", key="clear_input")
-    st.experimental_rerun()
+    # Instead of rerunning, we will clear the text input
+    st.session_state.username = ""
+    st.experimental_rerun()  # Use this to refresh the app and clear previous data
